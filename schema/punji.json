@@ -1,0 +1,330 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PackageManifest",
+  "type": "object",
+  "required": [
+    "commands",
+    "dependencies",
+    "fs",
+    "kind",
+    "modules",
+    "package"
+  ],
+  "properties": {
+    "commands": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Command"
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "fs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "kind": {
+      "description": "Metadata about the package itself.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/PackageManifestKind"
+        }
+      ]
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Module"
+      }
+    },
+    "package": {
+      "$ref": "#/definitions/Package"
+    }
+  },
+  "definitions": {
+    "Abi": {
+      "type": "string",
+      "enum": [
+        "emscripten",
+        "none",
+        "wasi",
+        "wasm4"
+      ]
+    },
+    "Bindings": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "Wit"
+          ],
+          "properties": {
+            "Wit": {
+              "$ref": "#/definitions/WitBindings"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "Wai"
+          ],
+          "properties": {
+            "Wai": {
+              "$ref": "#/definitions/WaiBindings"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Command": {
+      "type": "object",
+      "required": [
+        "module",
+        "name",
+        "runner"
+      ],
+      "properties": {
+        "module": {
+          "$ref": "#/definitions/ModuleReference"
+        },
+        "name": {
+          "type": "string"
+        },
+        "runner": {
+          "type": "string"
+        }
+      }
+    },
+    "Module": {
+      "type": "object",
+      "required": [
+        "abi",
+        "name",
+        "source"
+      ],
+      "properties": {
+        "abi": {
+          "description": "The ABI this module satisfies.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Abi"
+            }
+          ]
+        },
+        "bindings": {
+          "description": "Interface definitions that can be used to generate bindings to this module.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Bindings"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "interfaces": {
+          "description": "WebAssembly interfaces this module requires.",
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "kind": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "The name used to refer to this module.",
+          "type": "string"
+        },
+        "source": {
+          "description": "The location of the module file on disk, relative to the manifest directory.",
+          "type": "string"
+        }
+      }
+    },
+    "ModuleReference": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "CurrentPackage"
+          ],
+          "properties": {
+            "CurrentPackage": {
+              "type": "object",
+              "required": [
+                "module"
+              ],
+              "properties": {
+                "module": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "Dependency"
+          ],
+          "properties": {
+            "Dependency": {
+              "type": "object",
+              "required": [
+                "dependency",
+                "module"
+              ],
+              "properties": {
+                "dependency": {
+                  "type": "string"
+                },
+                "module": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Package": {
+      "type": "object",
+      "required": [
+        "description",
+        "name",
+        "version"
+      ],
+      "properties": {
+        "description": {
+          "description": "A brief description of the package.",
+          "type": "string"
+        },
+        "entrypoint": {
+          "description": "The name of the command that should be used by `wasmer run` by default.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "homepage": {
+          "description": "The website used as the package's homepage.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "license": {
+          "description": "A SPDX license specifier for this package.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "license-file": {
+          "description": "The location of the license file, useful for non-standard licenses",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "The package's name in the form `namespace/name`.",
+          "type": "string"
+        },
+        "private": {
+          "description": "Mark this as a private package",
+          "type": "boolean"
+        },
+        "readme": {
+          "description": "The package's README file.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "repository": {
+          "description": "A URL pointing to the package's source code.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "description": "The package's version number.",
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+        }
+      }
+    },
+    "PackageManifestKind": {
+      "type": "string",
+      "enum": [
+        "punji/package.v0"
+      ]
+    },
+    "WaiBindings": {
+      "type": "object",
+      "required": [
+        "imports",
+        "wai_version"
+      ],
+      "properties": {
+        "exports": {
+          "description": "The `*.wai` file defining the interface this package exposes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "imports": {
+          "description": "The `*.wai` files for any functionality this package imports from the host.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "wai_version": {
+          "description": "The version of the WAI format being used.",
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+        }
+      }
+    },
+    "WitBindings": {
+      "type": "object",
+      "required": [
+        "wit-bindgen",
+        "wit-exports"
+      ],
+      "properties": {
+        "wit-bindgen": {
+          "description": "The version of the WIT format being used.",
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+        },
+        "wit-exports": {
+          "description": "The `*.wit` file's location on disk.",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

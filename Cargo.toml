@@ -1,0 +1,16 @@
+[workspace]
+members = [
+    "crates/manifest",
+    "crates/cli",
+    "crates/registry",
+]
+resolver = "2"
+[workspace.package]
+authors = ["Ayush Jha <ayys@duck.com>"]
+edition = "2021"
+name = "punji"
+version = "0.1.0"
+rust-version = "1.70"
+homepage = "https://github.com/ayys/punji"
+repository = "https://github.com/ayys/punji"
+license = "GPL 3.0"
