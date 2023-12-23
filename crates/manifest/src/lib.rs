@@ -4,6 +4,7 @@ pub mod convert;
 mod package;
 mod pmodule;
 
+use anyhow::Context;
 use app_config::AppConfigV1;
 use command::Command;
 use indexmap::IndexMap;
@@ -75,9 +76,11 @@ impl Project {
         deserializer
             .into_iter()
             .map(|document| {
-                Ok(serde_yaml::from_value(serde_yaml::Value::deserialize(
-                    document,
-                )?)?)
+                serde_yaml::from_value(
+                    serde_yaml::Value::deserialize(document)
+                        .with_context(|| "Invalid yaml file")?,
+                )
+                .with_context(|| "Invalid punji manifest")
             })
             .collect()
     }

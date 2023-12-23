@@ -1,7 +1,8 @@
+use anyhow::Context;
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::{Verbosity, WarnLevel};
 use log::{info, warn};
-use manifest::{Project};
+use manifest::Project;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -15,7 +16,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// does testing things
+    /// Generate wasmer.toml and app.yaml from the punji manifest
     Build {
         /// Input file to parse
         #[clap(default_value = "punji.yaml")]
@@ -46,7 +47,7 @@ where
             ));
         }
     }
-    std::fs::write(filename, document.convert().unwrap()).unwrap();
+    std::fs::write(filename, document.convert()?)?;
     info!("Created: {}", filename.display());
     Ok(())
 }
@@ -56,11 +57,11 @@ fn main() -> anyhow::Result<()> {
     pretty_env_logger::formatted_builder()
         .filter_level(cli.verbose.log_level_filter())
         .try_init()?;
-
     match cli.command {
         Commands::Build { input, overwrite } => {
-            let contents = std::fs::read_to_string(input).unwrap();
-            let project = Project::parse_many(&contents).unwrap();
+            let contents = std::fs::read_to_string(&input)
+                .with_context(|| format!("Could not open file: {}", input.display()))?;
+            let project = Project::parse_many(&contents)?;
             for document in project {
                 match document {
                     Project::Package(package) => write_to_file(package.as_ref(), overwrite)?,

@@ -14,3 +14,9 @@ rust-version = "1.70"
 homepage = "https://github.com/ayys/punji"
 repository = "https://github.com/ayys/punji"
 license = "GPL 3.0"
+
+
+[workspace.dependencies]
+anyhow = "1.0.76"
+semver = "^1.0.9"
+serde = {version = "1.0.193", features = ["derive"]}
